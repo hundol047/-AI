@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings as SettingsIcon, Database, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
+import { Settings as SettingsIcon, Database, Sparkles, Globe, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SettingsStatus {
   supabaseConfigured: boolean;
   openaiConfigured: boolean;
+  tavilyConfigured: boolean;
   storageMode: "supabase" | "memory";
+  agentMode: "real" | "simulated";
 }
 
 export default function SettingsPage() {
@@ -33,27 +35,49 @@ export default function SettingsPage() {
       </div>
 
       <div className="glass-panel p-5">
-        <h2 className="mb-4 text-sm font-semibold text-white">연결 상태</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-white">연결 상태</h2>
+          <span
+            className={cn(
+              "badge",
+              status?.agentMode === "real"
+                ? "border-success/40 bg-success/10 text-success"
+                : "border-amber-400/40 bg-amber-400/10 text-amber-400"
+            )}
+          >
+            {status?.agentMode === "real" ? "실제 에이전트 모드" : "시뮬레이션 모드"}
+          </span>
+        </div>
         <div className="space-y-3">
           <StatusRow
-            icon={Database}
-            label="Supabase"
+            icon={Globe}
+            label="Tavily Search API"
             description={
-              status?.storageMode === "supabase"
-                ? "Supabase 프로젝트에 실행 데이터가 저장됩니다."
-                : "환경변수가 설정되지 않아 in-memory 저장소를 사용 중입니다 (개발용 fallback)."
+              status?.tavilyConfigured
+                ? "Search / Tool Call 단계가 실제 Tavily 검색·추출 API를 호출합니다."
+                : "TAVILY_API_KEY가 없어 Search / Tool Call 단계가 시뮬레이션(mock) 데이터로 동작합니다."
             }
-            ok={Boolean(status?.supabaseConfigured)}
+            ok={Boolean(status?.tavilyConfigured)}
           />
           <StatusRow
             icon={Sparkles}
             label="OpenAI API"
             description={
               status?.openaiConfigured
-                ? "OpenAI를 통해 Root Cause Analysis가 생성됩니다."
-                : "OPENAI_API_KEY가 없어 규칙 기반 mock 분석기를 사용 중입니다."
+                ? "Plan / Result 단계와 Root Cause Analysis가 실제 OpenAI로 생성됩니다."
+                : "OPENAI_API_KEY가 없어 Plan/Result/분석이 규칙 기반 mock으로 동작합니다."
             }
             ok={Boolean(status?.openaiConfigured)}
+          />
+          <StatusRow
+            icon={Database}
+            label="Supabase"
+            description={
+              status?.storageMode === "supabase"
+                ? "Supabase 프로젝트에 실행 데이터가 영구 저장됩니다."
+                : "환경변수가 설정되지 않아 in-memory 저장소를 사용 중입니다 (재시작 시 초기화됨)."
+            }
+            ok={Boolean(status?.supabaseConfigured)}
           />
         </div>
       </div>
@@ -61,11 +85,15 @@ export default function SettingsPage() {
       <div className="glass-panel p-5">
         <h2 className="mb-3 text-sm font-semibold text-white">환경변수</h2>
         <p className="mb-3 text-xs text-white/45">
-          프로젝트 루트의 <code className="rounded bg-white/10 px-1 py-0.5">.env.local</code> 파일에 아래 값을
-          설정하세요. API Key는 서버에서만 사용되며 클라이언트에 노출되지 않습니다.
+          프로젝트 루트의 <code className="rounded bg-white/10 px-1 py-0.5">.env.local</code> 파일(또는 Vercel
+          프로젝트의 Environment Variables)에 아래 값을 설정하세요. API Key는 서버에서만 사용되며 클라이언트에
+          노출되지 않습니다. <strong className="text-white/60">TAVILY_API_KEY</strong>와{" "}
+          <strong className="text-white/60">OPENAI_API_KEY</strong>를 모두 설정하면 실제 에이전트 모드로
+          전환됩니다.
         </p>
         <pre className="code-block whitespace-pre-wrap">
 {`OPENAI_API_KEY=
+TAVILY_API_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=`}
