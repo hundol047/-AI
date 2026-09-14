@@ -19,15 +19,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request" }, { status: 400 });
   }
 
-  const run = await db.createRun(parsed.data);
-  const stream = createRunStream(run);
+  let run;
+  try {
+    run = await db.createRun(parsed.data);
+  } catch (err) {
+    console.error("[POST /api/runs] createRun failed:", err);
+    return NextResponse.json(
+      { error: "Failed to create run. Check your Supabase configuration (has the SQL migration been run?)." },
+      { status: 500 }
+    );
+  }
 
+  const stream = createRunStream(run);
   return new Response(stream, { headers: NDJSON_HEADERS });
 }
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const limit = Number(url.searchParams.get("limit") ?? "100");
-  const runs = await db.listRuns(Number.isFinite(limit) ? limit : 100);
-  return NextResponse.json({ runs });
+  try {
+    const runs = await db.listRuns(Number.isFinite(limit) ? limit : 100);
+    return NextResponse.json({ runs });
+  } catch (err) {
+    console.error("[GET /api/runs] listRuns failed:", err);
+    return NextResponse.json({ error: "Failed to load runs." }, { status: 500 });
+  }
 }
