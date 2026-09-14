@@ -44,14 +44,16 @@ export function createRunStream(
         new Date(completedAt).getTime() - new Date(run.startedAt).getTime()
       );
       const finalStatus = sawFailure ? "failed" : "completed";
+      const fallbackRun = { ...run, status: finalStatus, completedAt, durationMs } as AgentRun;
 
-      const updated = await db.updateRun(run.id, {
-        status: finalStatus,
-        completedAt,
-        durationMs,
-      });
+      let updated: AgentRun | null = null;
+      try {
+        updated = await db.updateRun(run.id, { status: finalStatus, completedAt, durationMs });
+      } catch (err) {
+        console.error(`[createRunStream] Failed to persist final status for run ${run.id}:`, err);
+      }
 
-      send({ kind: "done", run: updated ?? { ...run, status: finalStatus, completedAt, durationMs } });
+      send({ kind: "done", run: updated ?? fallbackRun });
       controller.close();
     },
   });

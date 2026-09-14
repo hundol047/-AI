@@ -2,12 +2,27 @@ import { Activity, CheckCircle2, XCircle, Percent, Timer, AlertOctagon } from "l
 import { computeAnalytics } from "@/lib/analytics";
 import { AnalyticsCard } from "@/components/analytics/AnalyticsCard";
 import { RunsByDayChart, ErrorTypesChart, StatusBreakdownChart } from "@/components/analytics/AnalyticsCharts";
+import { DataLoadError } from "@/components/common/DataLoadError";
 import { formatDuration } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsPage() {
-  const summary = await computeAnalytics();
+  let summary: Awaited<ReturnType<typeof computeAnalytics>>;
+  try {
+    summary = await computeAnalytics();
+  } catch (err) {
+    console.error("[AnalyticsPage] computeAnalytics failed:", err);
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold text-white">Analytics</h1>
+          <p className="text-sm text-white/45">성공률, 오류 유형, 실행 시간 등의 통계를 확인하세요.</p>
+        </div>
+        <DataLoadError message="통계를 불러오지 못했습니다." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

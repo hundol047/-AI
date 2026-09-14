@@ -3,13 +3,28 @@ import { Activity, CheckCircle2, XCircle, Percent, ArrowRight } from "lucide-rea
 import { computeAnalytics } from "@/lib/analytics";
 import { AnalyticsCard } from "@/components/analytics/AnalyticsCard";
 import { RunStatusPill } from "@/components/common/RunStatusBadge";
+import { DataLoadError } from "@/components/common/DataLoadError";
 import { SCENARIO_LABELS } from "@/lib/types";
 import { formatDateTime, formatDuration, shortId } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const summary = await computeAnalytics();
+  let summary: Awaited<ReturnType<typeof computeAnalytics>>;
+  try {
+    summary = await computeAnalytics();
+  } catch (err) {
+    console.error("[DashboardPage] computeAnalytics failed:", err);
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-xl font-bold text-white">Overview</h1>
+          <p className="text-sm text-white/45">TraceAgent의 전체 실행 현황을 한눈에 확인하세요.</p>
+        </div>
+        <DataLoadError message="실행 현황을 불러오지 못했습니다." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
