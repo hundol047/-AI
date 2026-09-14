@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #020817;
+  color: #e6edf7;
+}
+
+body {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(24, 231, 242, 0.07), transparent 42%),
+    radial-gradient(circle at 85% 8%, rgba(114, 92, 255, 0.09), transparent 46%),
+    radial-gradient(circle at 50% 100%, rgba(49, 130, 255, 0.06), transparent 55%);
+  background-attachment: fixed;
+}
+
+* {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+::selection {
+  background: rgba(24, 231, 242, 0.25);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(24, 231, 242, 0.35);
+}
+
+@layer components {
+  .glass-panel {
+    @apply relative rounded-2xl border border-cyan/15 bg-white/[0.03] backdrop-blur-xl shadow-card;
+  }
+
+  .glass-card {
+    @apply relative rounded-xl border border-white/[0.08] bg-bg-card/70 backdrop-blur-md shadow-card;
+  }
+
+  .glow-border {
+    @apply border border-cyan/30 shadow-glow;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan to-blue px-5 py-2.5 text-sm font-semibold text-bg transition-all hover:shadow-glow hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white/90 transition-all hover:border-cyan/40 hover:bg-white/10 active:scale-[0.98];
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium;
+  }
+
+  .code-block {
+    @apply rounded-lg border border-white/10 bg-black/40 p-3 font-mono text-xs leading-relaxed text-cyan/90 overflow-x-auto;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-cyan via-blue to-purple bg-clip-text text-transparent;
+  }
+}
