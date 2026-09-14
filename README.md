@@ -60,7 +60,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 | 변수 | 비워두면 | 설정하면 |
 |---|---|---|
-| `OPENAI_API_KEY` | 규칙 기반 mock Root Cause 분석기 사용 | GPT-4o-mini 기반 실제 AI 분석 (`generateObject`) |
+| `OPENAI_API_KEY` | 규칙 기반 mock Root Cause 분석기 + 템플릿 기반 mock 최종 답변 사용 | GPT-4o-mini 기반 실제 Root Cause 분석(`generateObject`) + 사용자 요청에 대한 실제 AI 답변(`generateText`, Result 단계) |
 | `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | 프로세스 메모리에 실행 기록 저장 (재시작 시 초기화) | Supabase Postgres에 영구 저장 |
 
 `/settings` 페이지에서 현재 연결 상태(Supabase / OpenAI)를 실시간으로 확인할 수 있습니다.

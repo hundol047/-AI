@@ -1,5 +1,6 @@
 import type { Scenario, StepName, TraceError, TraceEvent } from "@/lib/types";
-import { buildFinalAnswer, buildPlan, buildSearchResults } from "@/lib/agent/mockData";
+import { buildPlan, buildSearchResults } from "@/lib/agent/mockData";
+import { generateFinalAnswer } from "@/lib/ai/generateAnswer";
 
 export interface RunAgentOptions {
   runId: string;
@@ -220,15 +221,14 @@ export async function* runDemoAgent(
       status: "running",
       startedAt,
     };
-    await sleep(jitter(700, 250));
+    const { answer, source: answerSource } = await generateFinalAnswer(userRequest, results);
     const completedAt = new Date().toISOString();
-    const answer = buildFinalAnswer(userRequest, results);
     yield {
       id: eventId(runId, "result"),
       runId,
       step: "result",
       status: "completed",
-      output: { answer },
+      output: { answer, generatedBy: answerSource },
       startedAt,
       completedAt,
       durationMs: new Date(completedAt).getTime() - new Date(startedAt).getTime(),
