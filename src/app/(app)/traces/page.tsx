@@ -10,12 +10,12 @@ export const dynamic = "force-dynamic";
 
 export default async function TracesPage() {
   let runs: Awaited<ReturnType<typeof db.listRuns>> = [];
-  let loadError = false;
+  let loadErrorMessage: string | null = null;
   try {
     runs = await db.listRuns(100);
   } catch (err) {
     console.error("[TracesPage] listRuns failed:", err);
-    loadError = true;
+    loadErrorMessage = err instanceof Error ? err.message : String(err);
   }
 
   return (
@@ -30,9 +30,9 @@ export default async function TracesPage() {
         </div>
       </div>
 
-      {loadError && <DataLoadError message="실행 기록을 불러오지 못했습니다." />}
+      {loadErrorMessage && <DataLoadError message={`실행 기록을 불러오지 못했습니다: ${loadErrorMessage}`} />}
 
-      {!loadError && (
+      {!loadErrorMessage && (
       <div className="glass-panel overflow-hidden">
         {runs.length === 0 ? (
           <div className="p-12 text-center text-sm text-white/40">

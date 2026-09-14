@@ -29,6 +29,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ analysis });
   } catch (err) {
     console.error(`[POST /api/runs/${id}/analyze] failed:`, err);
-    return NextResponse.json({ error: "Failed to analyze run" }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to analyze run: ${detail}` }, { status: 500 });
   }
 }

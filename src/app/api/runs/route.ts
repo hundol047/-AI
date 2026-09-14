@@ -24,10 +24,8 @@ export async function POST(req: Request) {
     run = await db.createRun(parsed.data);
   } catch (err) {
     console.error("[POST /api/runs] createRun failed:", err);
-    return NextResponse.json(
-      { error: "Failed to create run. Check your Supabase configuration (has the SQL migration been run?)." },
-      { status: 500 }
-    );
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to create run: ${detail}` }, { status: 500 });
   }
 
   const stream = createRunStream(run);

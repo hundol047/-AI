@@ -45,7 +45,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     });
   } catch (err) {
     console.error(`[POST /api/runs/${id}/replay] failed:`, err);
-    return NextResponse.json({ error: "Failed to start replay." }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to start replay: ${detail}` }, { status: 500 });
   }
 
   const stream = createRunStream(replayRun, fixApplied);

@@ -10,6 +10,7 @@ export async function GET() {
     return NextResponse.json(summary);
   } catch (err) {
     console.error("[GET /api/analytics] failed:", err);
-    return NextResponse.json({ error: "Failed to load analytics." }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to load analytics: ${detail}` }, { status: 500 });
   }
 }

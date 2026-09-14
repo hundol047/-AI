@@ -21,7 +21,7 @@ export default async function DashboardPage() {
           <h1 className="text-xl font-bold text-white">Overview</h1>
           <p className="text-sm text-white/45">TraceAgent의 전체 실행 현황을 한눈에 확인하세요.</p>
         </div>
-        <DataLoadError message="실행 현황을 불러오지 못했습니다." />
+        <DataLoadError message={`실행 현황을 불러오지 못했습니다: ${err instanceof Error ? err.message : String(err)}`} />
       </div>
     );
   }
