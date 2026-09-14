@@ -16,17 +16,28 @@ let cachedClient: SupabaseClient | null | undefined;
 export function getSupabaseServerClient(): SupabaseClient | null {
   if (cachedClient !== undefined) return cachedClient;
 
-  const url = getSupabaseUrl();
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = getSupabaseUrl()?.trim();
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
   if (!url || !serviceKey) {
     cachedClient = null;
     return null;
   }
 
-  cachedClient = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  // createClient() throws synchronously on a malformed URL. A bad value here
+  // must never take the whole app down — fall back to the in-memory store
+  // (see src/lib/db/store.ts) exactly as if Supabase were left unconfigured.
+  try {
+    cachedClient = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  } catch (err) {
+    console.error(
+      "[supabase] Failed to initialize client (check NEXT_PUBLIC_SUPABASE_URL / SUPABASE_URL is a valid https:// URL); falling back to in-memory store:",
+      err
+    );
+    cachedClient = null;
+  }
   return cachedClient;
 }
 
@@ -38,6 +49,9 @@ function getSupabaseUrl(): string | undefined {
   return process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 }
 
+// Reflects whether Supabase is actually usable (client constructed
+// successfully), not just whether env vars are present, so this can never
+// disagree with getSupabaseServerClient() and cause a null-client crash.
 export function isSupabaseConfigured(): boolean {
-  return Boolean(getSupabaseUrl() && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return getSupabaseServerClient() !== null;
 }
