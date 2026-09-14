@@ -30,7 +30,19 @@ export function createRunStream(
           scenario: run.scenario,
           fixApplied,
         })) {
-          await db.upsertTraceEvent(event);
+          // Persistence failures (a transient Supabase blip, a gateway
+          // timeout, ...) must never abort the actual agent execution — the
+          // real Tavily/OpenAI work has nothing to do with whether this one
+          // event could be saved. Log it and keep the run going; only a
+          // failure in the agent logic itself should stop the stream.
+          try {
+            await db.upsertTraceEvent(event);
+          } catch (persistErr) {
+            console.error(
+              `[createRunStream] Failed to persist trace event (${event.step}/${event.status}) for run ${run.id}:`,
+              persistErr
+            );
+          }
           send({ kind: "trace_event", event });
           if (event.status === "failed") sawFailure = true;
         }
