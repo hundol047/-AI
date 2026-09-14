@@ -243,6 +243,7 @@ function ArtifactsTab({ events }: { events: RunWithDetails["events"] }) {
   const search = events.find((e) => e.step === "search");
   const result = events.find((e) => e.step === "result");
   const searchResults = (search?.output as { results?: unknown[] } | undefined)?.results ?? [];
+  const searchSource = (search?.output as { source?: string } | undefined)?.source;
   const answer = (result?.output as { answer?: string } | undefined)?.answer;
   const generatedBy = (result?.output as { generatedBy?: string } | undefined)?.generatedBy;
 
@@ -254,7 +255,14 @@ function ArtifactsTab({ events }: { events: RunWithDetails["events"] }) {
     <div className="space-y-4 p-4">
       {searchResults.length > 0 && (
         <div>
-          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/40">Search Results</h4>
+          <div className="mb-2 flex items-center justify-between">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-white/40">Search Results</h4>
+            {searchSource && (
+              <span className="text-[10px] text-white/30">
+                {searchSource === "tavily" ? "Real results via Tavily" : "Simulated (mock) results"}
+              </span>
+            )}
+          </div>
           <pre className="code-block whitespace-pre-wrap break-words">{JSON.stringify(searchResults, null, 2)}</pre>
         </div>
       )}
