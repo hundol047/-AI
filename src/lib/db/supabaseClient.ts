@@ -16,7 +16,7 @@ let cachedClient: SupabaseClient | null | undefined;
 export function getSupabaseServerClient(): SupabaseClient | null {
   if (cachedClient !== undefined) return cachedClient;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = getSupabaseUrl();
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
@@ -30,6 +30,14 @@ export function getSupabaseServerClient(): SupabaseClient | null {
   return cachedClient;
 }
 
+// Accepts either the Next.js-conventional NEXT_PUBLIC_SUPABASE_URL or the
+// plain SUPABASE_URL some Supabase↔Vercel integrations provision automatically,
+// so the app works with whichever one ends up set without the user having to
+// fight a "variable already exists" error in the Vercel dashboard.
+function getSupabaseUrl(): string | undefined {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+}
+
 export function isSupabaseConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(getSupabaseUrl() && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
