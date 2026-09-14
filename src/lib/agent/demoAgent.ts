@@ -213,7 +213,8 @@ export async function* runDemoAgent(
   }
 
   // --- Step 2: Plan -----------------------------------------------------------
-  const { steps: plan, source: planSource } = await generatePlanSteps(userRequest);
+  let plan: string[];
+  let planSource: "openai" | "mock";
   {
     const startedAt = new Date().toISOString();
     yield {
@@ -224,6 +225,9 @@ export async function* runDemoAgent(
       input: { userRequest },
       startedAt,
     };
+    const generated = await generatePlanSteps(userRequest);
+    plan = generated.steps;
+    planSource = generated.source;
     const completedAt = new Date().toISOString();
     yield {
       id: eventId(runId, "plan"),
