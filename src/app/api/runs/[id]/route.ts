@@ -23,6 +23,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json(payload);
   } catch (err) {
     console.error(`[GET /api/runs/${id}] failed:`, err);
-    return NextResponse.json({ error: "Failed to load run." }, { status: 500 });
+    const detail = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Failed to load run: ${detail}` }, { status: 500 });
   }
 }

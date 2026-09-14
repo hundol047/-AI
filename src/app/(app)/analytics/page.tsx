@@ -19,7 +19,7 @@ export default async function AnalyticsPage() {
           <h1 className="text-xl font-bold text-white">Analytics</h1>
           <p className="text-sm text-white/45">성공률, 오류 유형, 실행 시간 등의 통계를 확인하세요.</p>
         </div>
-        <DataLoadError message="통계를 불러오지 못했습니다." />
+        <DataLoadError message={`통계를 불러오지 못했습니다: ${err instanceof Error ? err.message : String(err)}`} />
       </div>
     );
   }
