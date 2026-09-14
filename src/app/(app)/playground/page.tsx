@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, Loader2, RotateCcw, FlaskConical } from "lucide-react";
 import { AgentExecutionFlow } from "@/components/trace/AgentExecutionFlow";
 import { TraceTimeline } from "@/components/trace/TraceTimeline";
@@ -30,18 +30,29 @@ export default function PlaygroundPage() {
   const hasFailed = mainRun.run?.status === "failed";
   const isBusy = mainRun.isStreaming || replayRun.isStreaming;
 
+  // Tracks the run the user is currently looking at, so a slow /analyze
+  // response for a run they've since moved away from (e.g. started a new
+  // run while the previous run's analysis was still in flight) can't clobber
+  // the UI with stale Root Cause Analysis / Recommended Fix content.
+  const currentRunIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    currentRunIdRef.current = mainRun.run?.id ?? null;
+  }, [mainRun.run?.id]);
+
   const runAnalysis = useCallback(async (runId: string) => {
     setAnalyzing(true);
     setAnalyzeError(null);
     try {
       const res = await fetch(`/api/runs/${runId}/analyze`, { method: "POST" });
       const data = await res.json();
+      if (currentRunIdRef.current !== runId) return; // stale: user has moved on to another run
       if (!res.ok) throw new Error(data.error ?? "분석에 실패했습니다.");
       setAnalysis(data.analysis as FailureAnalysis);
     } catch (err) {
+      if (currentRunIdRef.current !== runId) return;
       setAnalyzeError(err instanceof Error ? err.message : "분석에 실패했습니다.");
     } finally {
-      setAnalyzing(false);
+      if (currentRunIdRef.current === runId) setAnalyzing(false);
     }
   }, []);
 
